@@ -46,7 +46,11 @@ const AppSubMenu = (props: MenuProps) => {
         <MenuProvider>
             <ul className="layout-menu">
                 {props.model.map((item, i) => {
-                    return !item.separator ? <AppMenuitem item={item} root={true} index={i} key={item.label} /> : <li key={i} className="menu-separator"></li>;
+                    return !item.separator ? (
+                        <AppMenuitem item={item} root={true} index={i} key={item.label ?? i} />
+                    ) : (
+                        <li key={i} className="menu-separator"></li>
+                    );
                 })}
             </ul>
             <Tooltip ref={tooltipRef} target="li:not(.active-menuitem)>.tooltip-target" />
