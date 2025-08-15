@@ -6,6 +6,7 @@ import { Calendar } from 'primereact/calendar';
 import { InputText } from 'primereact/inputtext';
 import { InputTextarea } from 'primereact/inputtextarea';
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 function ProfileCreate() {
     const [formData, setFormData] = useState({
@@ -43,6 +44,8 @@ function ProfileCreate() {
         setFormData((prev) => ({ ...prev, [field]: value }));
     };
 
+    const router = useRouter();
+
     const handleSubmit = async () => {
         console.log("Submitting form data:", formData);
         try {
@@ -62,7 +65,15 @@ function ProfileCreate() {
 
     return (
         <div className="card">
-            <span className="text-900 text-xl font-bold mb-4 block">Create Member</span>
+            <div className="flex align-items-center justify-content-between mb-4">
+                <span className="text-900 text-xl font-bold">Create Member</span>
+                <Button
+                    label="Back"
+                    icon="pi pi-arrow-left"
+                    outlined
+                    onClick={() => router.push('/apps/user-management/list')}
+                />
+            </div>
             <div className="grid">
                 <div className="col-12 lg:col-2">
                     <div className="text-900 font-medium text-xl mb-3">Member Info</div>
