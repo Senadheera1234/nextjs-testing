@@ -1,148 +1,128 @@
 'use client';
+
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { FilterMatchMode, FilterOperator } from 'primereact/api';
-import { Button } from 'primereact/button';
+import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-import { DataTable, DataTableFilterMeta } from 'primereact/datatable';
-import { InputText } from 'primereact/inputtext';
-import { ProgressBar } from 'primereact/progressbar';
-import React, { useEffect, useRef, useState } from 'react';
-import { CustomerService } from '../../../../../demo/service/CustomerService';
+import { Button } from 'primereact/button';
+import { Dialog } from 'primereact/dialog';
+import { ProgressSpinner } from 'primereact/progressspinner';
+import MemberDetail, { Member } from './MemberDetail';
 
-function List() {
-    const [customers, setCustomers] = useState<Demo.Customer[]>([]);
-    const [filters, setFilters] = useState<DataTableFilterMeta>({});
-    const [loading, setLoading] = useState(true);
-    const [globalFilterValue, setGlobalFilterValue] = useState('');
-    const router = useRouter();
-    const dt = useRef(null);
+const API_BASE =
+  process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, '') || 'http://127.0.0.1:8000';
 
-    const getCustomers = (data: Demo.Customer[]) => {
-        return [...(data || [])].map((d) => {
-            d.date = new Date(d.date);
-            return d;
-        });
-    };
+export default function MemberListPage() {
+  const router = useRouter();
+  const [members, setMembers] = useState<Member[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [selected, setSelected] = useState<Member | null>(null);
 
-    const formatDate = (value: Date) => {
-        return value.toLocaleDateString('en-US', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-        });
-    };
-    const clearFilter = () => {
-        initFilters();
-    };
+  const fetchMembers = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(`${API_BASE}/api/members/`);
+      if (!res.ok) throw new Error('Failed to fetch members');
+      const data: Member[] = await res.json();
+      setMembers(data);
+    } catch (err: any) {
+      setError(err.message || 'Error fetching members');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    const initFilters = () => {
-        setFilters({
-            global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-            name: {
-                operator: FilterOperator.AND,
-                constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }]
-            },
-            'country.name': {
-                operator: FilterOperator.AND,
-                constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }]
-            },
-            representative: { value: null, matchMode: FilterMatchMode.IN },
-            date: {
-                operator: FilterOperator.AND,
-                constraints: [{ value: null, matchMode: FilterMatchMode.DATE_IS }]
-            },
-            activity: { value: null, matchMode: FilterMatchMode.BETWEEN }
-        });
-        setGlobalFilterValue('');
-    };
+  useEffect(() => {
+    fetchMembers();
+  }, []);
 
-    useEffect(() => {
-        CustomerService.getCustomersLarge().then((data) => {
-            setCustomers(getCustomers(data));
-            setLoading(false);
-        });
-        initFilters();
-    }, []);
+  const formatDate = (d: string) => (d ? new Date(d).toISOString().slice(0, 10) : '');
 
-    const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { value } = e.target;
-        let _filters = { ...filters };
-        (_filters['global'] as any).value = value;
-        setFilters(_filters);
-        setGlobalFilterValue(value);
-    };
+  const actionBodyTemplate = (member: Member) => (
+    <div className="flex gap-2">
+      <Button
+        label="View"
+        icon="pi pi-eye"
+        className="p-button-text"
+        onClick={() => setSelected(member)}
+        aria-label={`View ${member.first_name} ${member.last_name}`}
+      />
+      <Button
+        label="Bio"
+        icon="pi pi-user"
+        className="p-button-text"
+        onClick={() => router.push(`/apps/user-management/profile/${member.id}`)}
+        aria-label={`Open bio for ${member.first_name} ${member.last_name}`}
+      />
+    </div>
+  );
 
-    const renderHeader = () => {
-        return (
-            <div className="flex flex-wrap gap-2 align-items-center justify-content-between">
-                <span className="p-input-icon-left w-full sm:w-20rem flex-order-1 sm:flex-order-0">
-                    <i className="pi pi-search"></i>
-                    <InputText value={globalFilterValue} onChange={onGlobalFilterChange} placeholder="Global Search" className="w-full" />
-                </span>
-                <Button type="button" icon="pi pi-user-plus" label="Add New" className="w-full sm:w-auto flex-order-0 sm:flex-order-1" outlined onClick={() => router.push('/apps/user-management/create')} />
-            </div>
-        );
-    };
+  return (
+    <div className="card">
+      <div className="flex justify-content-between align-items-center mb-3">
+        <h2 className="m-0 text-xl">Members</h2>
+        <Button
+          label="Create Member"
+          icon="pi pi-plus"
+          onClick={() => router.push('/apps/user-management/create')}
+          aria-label="Create member"
+        />
+      </div>
 
-    const nameBodyTemplate = (customer: Demo.Customer) => {
-        return (
-            <>
-                <span className="p-column-title">Name</span>
-                {customer.name}
-            </>
-        );
-    };
-
-    const countryBodyTemplate = (customer: Demo.Customer) => {
-        return (
-            <>
-                <img alt={customer.country.name} src={`/demo/images/flag/flag_placeholder.png`} className={'w-2rem mr-2 flag flag-' + customer.country.code} />
-                <span className="image-text">{customer.country.name}</span>
-            </>
-        );
-    };
-
-    const createdByBodyTemplate = (customer: Demo.Customer) => {
-        return (
-            <div className="inline-flex align-items-center">
-                <img alt={customer.representative.name} src={`/demo/images/avatar/${customer.representative.image}`} className="w-2rem mr-2" />
-                <span>{customer.representative.name}</span>
-            </div>
-        );
-    };
-
-    const dateBodyTemplate = (customer: Demo.Customer) => {
-        return formatDate(customer.date);
-    };
-
-    const activityBodyTemplate = (customer: Demo.Customer) => {
-        return <ProgressBar value={customer.activity} showValue={false} style={{ height: '.5rem' }} />;
-    };
-
-    const header = renderHeader();
-
-    return (
-        <div className="card">
-            <DataTable
-                ref={dt}
-                value={customers}
-                header={header}
-                paginator
-                rows={10}
-                responsiveLayout="scroll"
-                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-                rowsPerPageOptions={[10, 25, 50]}
-                filters={filters}
-                loading={loading}
-            >
-                <Column field="name" header="Name" sortable body={nameBodyTemplate} headerClassName="white-space-nowrap" style={{ width: '25%' }}></Column>
-                <Column field="country.name" header="Country" sortable body={countryBodyTemplate} headerClassName="white-space-nowrap" style={{ width: '25%' }}></Column>
-                <Column field="date" header="Join Date" sortable body={dateBodyTemplate} headerClassName="white-space-nowrap" style={{ width: '25%' }}></Column>
-                <Column field="representative.name" header="Created By" body={createdByBodyTemplate} headerClassName="white-space-nowrap" style={{ width: '25%' }} sortable></Column>
-                <Column field="activity" header="Activity" body={activityBodyTemplate} headerClassName="white-space-nowrap" style={{ width: '25%' }} sortable></Column>
-            </DataTable>
+      {loading && (
+        <div className="flex justify-content-center p-4">
+          <ProgressSpinner />
         </div>
-    );
+      )}
+
+      {!loading && error && (
+        <div className="p-4 text-center">
+          <p className="mb-3">Error loading members.</p>
+          <Button label="Retry" icon="pi pi-refresh" onClick={fetchMembers} />
+        </div>
+      )}
+
+      {!loading && !error && (
+        <DataTable value={members} responsiveLayout="scroll" emptyMessage="No members found.">
+          <Column field="membership_id" header="Membership ID" />
+          <Column field="first_name" header="First Name" />
+          <Column field="last_name" header="Last Name" />
+          <Column field="phone" header="Phone" />
+          <Column field="status" header="Status" />
+          <Column
+            field="join_date"
+            header="Join Date"
+            body={(m: Member) => formatDate(m.join_date)}
+          />
+          <Column header="Actions" body={actionBodyTemplate} style={{ minWidth: '12rem' }} />
+        </DataTable>
+      )}
+
+      <Dialog
+        header={
+          selected
+            ? `Member: ${selected.membership_id} — ${selected.first_name} ${selected.last_name}`
+            : ''
+        }
+        visible={!!selected}
+        onHide={() => setSelected(null)}
+        style={{ width: '90vw', maxWidth: '600px' }}
+        modal
+        breakpoints={{ '960px': '75vw', '641px': '90vw' }}
+        draggable={false}
+      >
+        {selected && (
+          <div className="mb-3" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
+            <MemberDetail member={selected} />
+            <div className="flex justify-content-end mt-3">
+              <Button label="Close" onClick={() => setSelected(null)} />
+            </div>
+          </div>
+        )}
+      </Dialog>
+    </div>
+  );
 }
 
-export default List;
