@@ -44,15 +44,22 @@ function ProfileCreate() {
         setFormData((prev) => ({ ...prev, [field]: value }));
     };
 
-    const router = useRouter();
+    const toYMD = (d: Date | null) => (d ? new Date(d).toISOString().slice(0, 10) : null);
+
+    const payload = {
+        ...formData,
+        dob: toYMD(formData.dob),
+        joinDate: toYMD(formData.joinDate),
+        familyMembers: Number(formData.familyMembers || 0),
+    };
 
     const handleSubmit = async () => {
         console.log("Submitting form data:", formData);
         try {
-            const response = await fetch('https://dummyapi.com/members', {
+            const response = await fetch('http://127.0.0.1:8000/api/members', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData)
+                body: JSON.stringify(payload)
             });
             const data = await response.json();
             console.log("API Response:", data);
