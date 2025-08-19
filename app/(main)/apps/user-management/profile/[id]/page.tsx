@@ -113,7 +113,7 @@ export default function MemberBioPage({ params }: { params: { id: string } }) {
                 label="Edit"
                 icon="pi pi-pencil"
                 className="p-button-text"
-                disabled
+                 onClick={() => router.push(`/apps/user-management/edit/${member.id}`)}
               />
               <Button
                 label="Delete"

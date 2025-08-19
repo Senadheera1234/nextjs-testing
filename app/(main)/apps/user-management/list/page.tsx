@@ -19,6 +19,7 @@ export default function MemberListPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Fetch members from the backend
   const fetchMembers = async () => {
     setLoading(true);
     setError(null);
@@ -38,16 +39,27 @@ export default function MemberListPage() {
     fetchMembers();
   }, []);
 
+  // Format dates to YYYY-MM-DD
   const formatDate = (d: string) => (d ? new Date(d).toISOString().slice(0, 10) : '');
 
+  // Action buttons: View and Edit
   const actionBodyTemplate = (member: Member) => (
-    <Button
-      label="View"
-      icon="pi pi-eye"
-      className="p-button-sm"
-      onClick={() => router.push(`/apps/user-management/profile/${member.id}`)}
-      aria-label={`View ${member.first_name} ${member.last_name}`}
-    />
+    <div className="flex gap-2">
+      <Button
+        label="View"
+        icon="pi pi-eye"
+        className="p-button-sm"
+        onClick={() => router.push(`/apps/user-management/profile/${member.id}`)}
+        aria-label={`View ${member.first_name} ${member.last_name}`}
+      />
+      <Button
+        label="Edit"
+        icon="pi pi-pencil"
+        className="p-button-sm p-button-outlined"
+        onClick={() => router.push(`/apps/user-management/edit/${member.id}`)}
+        aria-label={`Edit ${member.first_name} ${member.last_name}`}
+      />
+    </div>
   );
 
   return (
