@@ -11,29 +11,10 @@ import { Card } from 'primereact/card';
 import { Toast } from 'primereact/toast';
 import { ProgressSpinner } from 'primereact/progressspinner';
 import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
+import MemberDetail, { Member } from '../../MemberDetail';
 
 const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, '') || 'http://127.0.0.1:8000';
-
-interface Member {
-  id: number;
-  membership_id: string;
-  first_name: string;
-  last_name: string;
-  nic: string;
-  phone: string;
-  status: string;
-  join_date: string;
-  gender: string;
-  dob: string;
-  address: string;
-  occupation: string;
-  family_members: string;
-  emergency_name: string;
-  emergency_number: string;
-  email: string;
-  notes: string;
-}
 
 export default function MemberBioPage({ params }: { params: { id: string } }) {
   const router = useRouter();
@@ -150,7 +131,6 @@ export default function MemberBioPage({ params }: { params: { id: string } }) {
     }
   };
 
-  const formatDate = (d: string) => (d ? new Date(d).toISOString().slice(0, 10) : '');
 
   if (loading) {
     return (
@@ -374,56 +354,7 @@ export default function MemberBioPage({ params }: { params: { id: string } }) {
             </div>
           </div>
         ) : (
-          <div className="grid">
-            <div className="col-12 md:col-6">
-              <strong>Membership ID:</strong> {member.membership_id}
-            </div>
-            <div className="col-12 md:col-6">
-              <strong>First Name:</strong> {member.first_name}
-            </div>
-            <div className="col-12 md:col-6">
-              <strong>Last Name:</strong> {member.last_name}
-            </div>
-            <div className="col-12 md:col-6">
-              <strong>NIC:</strong> {member.nic}
-            </div>
-            <div className="col-12 md:col-6">
-              <strong>Phone:</strong> {member.phone}
-            </div>
-            <div className="col-12 md:col-6">
-              <strong>Email:</strong> {member.email || '-'}
-            </div>
-            <div className="col-12">
-              <strong>Address:</strong> {member.address}
-            </div>
-            <div className="col-12 md:col-6">
-              <strong>Join Date:</strong> {formatDate(member.join_date)}
-            </div>
-            <div className="col-12 md:col-6">
-              <strong>Status:</strong> {member.status}
-            </div>
-            <div className="col-12 md:col-6">
-              <strong>Occupation:</strong> {member.occupation}
-            </div>
-            <div className="col-12 md:col-6">
-              <strong>Gender:</strong> {member.gender}
-            </div>
-            <div className="col-12 md:col-6">
-              <strong>DOB:</strong> {formatDate(member.dob)}
-            </div>
-            <div className="col-12">
-              <strong>Family Members:</strong> {member.family_members}
-            </div>
-            <div className="col-12 md:col-6">
-              <strong>Emergency Name:</strong> {member.emergency_name}
-            </div>
-            <div className="col-12 md:col-6">
-              <strong>Emergency Number:</strong> {member.emergency_number}
-            </div>
-            <div className="col-12">
-              <strong>Notes:</strong> {member.notes || '-'}
-            </div>
-          </div>
+          <MemberDetail member={member} />
         )}
       </Card>
     </div>

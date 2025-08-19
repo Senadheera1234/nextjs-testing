@@ -6,23 +6,17 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
 import { ProgressSpinner } from 'primereact/progressspinner';
+import { Dialog } from 'primereact/dialog';
+import MemberDetail, { Member } from '../MemberDetail';
 
 const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, '') || 'http://127.0.0.1:8000';
 
-interface Member {
-  id: number;
-  membership_id: string;
-  first_name: string;
-  last_name: string;
-  phone: string;
-  status: string;
-  join_date: string;
-}
-
 export default function MemberListPage() {
   const router = useRouter();
   const [members, setMembers] = useState<Member[]>([]);
+  const [selected, setSelected] = useState<Member | null>(null);
+  const [display, setDisplay] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -46,15 +40,28 @@ export default function MemberListPage() {
   }, []);
 
   const formatDate = (d: string) => (d ? new Date(d).toISOString().slice(0, 10) : '');
+  const viewMember = (member: Member) => {
+    setSelected(member);
+    setDisplay(true);
+  };
 
   const actionBodyTemplate = (member: Member) => (
-    <Button
-      label="Bio"
-      icon="pi pi-user"
-      className="p-button-text"
-      onClick={() => router.push(`/apps/user-management/profile/${member.id}`)}
-      aria-label={`Open bio for ${member.first_name} ${member.last_name}`}
-    />
+    <div className="flex gap-1">
+      <Button
+        label="View"
+        icon="pi pi-eye"
+        className="p-button-text"
+        onClick={() => viewMember(member)}
+        aria-label={`View member ${member.first_name} ${member.last_name}`}
+      />
+      <Button
+        label="Bio"
+        icon="pi pi-user"
+        className="p-button-text"
+        onClick={() => router.push(`/apps/user-management/profile/${member.id}`)}
+        aria-label={`Open bio for ${member.first_name} ${member.last_name}`}
+      />
+    </div>
   );
 
   const membershipBodyTemplate = (member: Member) => (
@@ -115,6 +122,15 @@ export default function MemberListPage() {
           />
         </DataTable>
       )}
+      <Dialog
+        header={`Member: ${selected?.membership_id} — ${selected?.first_name} ${selected?.last_name}`}
+        visible={display}
+        style={{ width: '50vw' }}
+        breakpoints={{ '960px': '75vw', '641px': '90vw' }}
+        onHide={() => setDisplay(false)}
+      >
+        {selected && <MemberDetail member={selected} />}
+      </Dialog>
     </div>
   );
 }
