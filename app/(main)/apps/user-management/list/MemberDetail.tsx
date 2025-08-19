@@ -46,6 +46,9 @@ export default function MemberDetail({ member }: { member: Member }) {
         <strong>DOB:</strong> {formatDate(member.dob)}
       </div>
       <div className="col-12 md:col-6">
+        <strong>DOB:</strong> {formatDate(member.dob)}
+      </div>
+      <div className="col-12 md:col-6">
         <strong>Email:</strong> {member.email || '-'}
       </div>
       <div className="col-12 md:col-6">

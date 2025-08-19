@@ -10,7 +10,7 @@ import { InputTextarea } from 'primereact/inputtextarea';
 import { Dropdown } from 'primereact/dropdown';
 import { Calendar } from 'primereact/calendar';
 import { ProgressSpinner } from 'primereact/progressspinner';
-import type { Member } from '../list/MemberDetail';
+import type { Member } from '../../list/MemberDetail';
 
 type DateLike = Date | null;
 
