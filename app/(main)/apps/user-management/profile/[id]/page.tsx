@@ -50,8 +50,8 @@ export default function MemberBioPage({ params }: { params: { id: string } }) {
     member?.status?.toLowerCase() === 'active'
       ? 'success'
       : member?.status?.toLowerCase() === 'inactive'
-      ? 'danger'
-      : 'info';
+        ? 'danger'
+        : 'info';
 
   if (loading) {
     return (
@@ -113,7 +113,7 @@ export default function MemberBioPage({ params }: { params: { id: string } }) {
                 label="Edit"
                 icon="pi pi-pencil"
                 className="p-button-text"
-                 onClick={() => router.push(`/apps/user-management/edit/${member.id}`)}
+                onClick={() => router.push(`/apps/user-management/edit/${member.id}`)}
               />
               <Button
                 label="Delete"
@@ -152,6 +152,10 @@ export default function MemberBioPage({ params }: { params: { id: string } }) {
             <div className="col-12 mb-3">
               <div className="font-medium text-600 mb-1">Family Members</div>
               <div className="text-900">{member.family_members}</div>
+            </div>
+            <div className="col-12 md:col-6 mb-3">
+              <div className="font-medium text-600 mb-1">NIC</div>
+              <div className="text-900">{member.nic}</div>
             </div>
           </div>
 

@@ -20,6 +20,7 @@ export interface Member {
   email: string;
   notes: string;
   created_at: string;
+  nic: string;
 }
 
 const formatDate = (d: string) => (d ? new Date(d).toISOString().slice(0, 10) : '');
@@ -44,6 +45,9 @@ export default function MemberDetail({ member }: { member: Member }) {
       </div>
       <div className="col-12 md:col-6">
         <strong>DOB:</strong> {formatDate(member.dob)}
+      </div>
+       <div className="col-12 md:col-6">
+        <strong>NIC:</strong> {member.nic /* show NIC */ }
       </div>
       <div className="col-12 md:col-6">
         <strong>DOB:</strong> {formatDate(member.dob)}
