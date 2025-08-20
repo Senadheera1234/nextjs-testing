@@ -1,4 +1,3 @@
-// app/(main)/apps/user-management/edit/[id]/page.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -9,16 +8,12 @@ import { InputText } from 'primereact/inputtext';
 import { InputTextarea } from 'primereact/inputtextarea';
 import { Dropdown } from 'primereact/dropdown';
 import { Calendar } from 'primereact/calendar';
+import { Divider } from 'primereact/divider';
 import { ProgressSpinner } from 'primereact/progressspinner';
 import type { Member } from '../../list/MemberDetail';
 
-// A type alias for nullable dates
 type DateLike = Date | null;
 
-/**
- * Shape of the data managed by this page's form.
- * Keys are camelCase to match the DRF serializer expectations.
- */
 interface FormState {
   firstName: string;
   lastName: string;
@@ -38,7 +33,6 @@ interface FormState {
   notes: string;
 }
 
-// Derive API base URL from environment with a fallback
 const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, '') ||
   'http://127.0.0.1:8000';
@@ -50,7 +44,6 @@ export default function MemberEditPage({ params }: { params: { id: string } }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Dropdown options
   const genderOptions = [
     { label: 'Male', value: 'Male' },
     { label: 'Female', value: 'Female' },
@@ -62,7 +55,6 @@ export default function MemberEditPage({ params }: { params: { id: string } }) {
     { label: 'Suspended', value: 'Suspended' },
   ];
 
-  // Fetch the member and populate form on mount
   useEffect(() => {
     const fetchMember = async () => {
       setLoading(true);
@@ -97,15 +89,13 @@ export default function MemberEditPage({ params }: { params: { id: string } }) {
     fetchMember();
   }, [params.id]);
 
-  // Generic handler to update form state
-  const handleChange = <K extends keyof FormState>(field: K, value: FormState[K]) => {
+  // Normal function avoids generic arrow issues in TSX
+  function handleChange<K extends keyof FormState>(field: K, value: FormState[K]) {
     setFormData((prev) => (prev ? { ...prev, [field]: value } : prev));
-  };
+  }
 
-  // Convert a Date to YYYY-MM-DD or null
   const toYMD = (d: DateLike) => (d ? new Date(d).toISOString().slice(0, 10) : null);
 
-  // Submit updated member
   const handleSubmit = async () => {
     if (!formData) return;
     setSaving(true);
@@ -152,7 +142,6 @@ export default function MemberEditPage({ params }: { params: { id: string } }) {
     }
   };
 
-  // Delete the member
   const handleDelete = async () => {
     if (!confirm('Are you sure you want to delete this member? This action cannot be undone.')) {
       return;
@@ -176,7 +165,6 @@ export default function MemberEditPage({ params }: { params: { id: string } }) {
     }
   };
 
-  // Loading indicator
   if (loading) {
     return (
       <div className="flex justify-content-center align-items-center min-h-screen">
@@ -185,7 +173,6 @@ export default function MemberEditPage({ params }: { params: { id: string } }) {
     );
   }
 
-  // Error state
   if (error || !formData) {
     return (
       <div className="p-4">
@@ -200,7 +187,6 @@ export default function MemberEditPage({ params }: { params: { id: string } }) {
     );
   }
 
-  // Main form layout
   return (
     <div className="p-4">
       <Button
@@ -210,18 +196,20 @@ export default function MemberEditPage({ params }: { params: { id: string } }) {
         onClick={() => router.push('/apps/user-management/list')}
       />
       <div className="card">
-      {/* The card wrapper gives a softer background per Atlantis guidelines */}
-        <Card className="p-4">
-          {/* Page heading */}
+        {/* Scoped wrapper so styles don't leak */}
+        <Card className="p-4 um-edit">
           <h2 className="m-0 mb-3 text-900">Edit Member</h2>
           <p className="text-600 mb-4">
             Modify member details below. All fields marked with * are required.
           </p>
 
-          {/* Personal Info */}
-          <h3 className="text-lg font-semibold mb-2 text-900">Personal Info</h3>
-          <div className="p-fluid grid formgrid">
-            <div className="field col-12 md:col-6 mb-3">
+          {/* Divider — Personal */}
+          <Divider align="center" className="um-divider">
+            <span className="um-divider-label">Personal Info</span>
+          </Divider>
+
+          <div className="p-fluid grid formgrid mt-3">
+            <div className="field col-12 md:col-6">
               <span className="p-float-label">
                 <InputText
                   id="firstName"
@@ -232,7 +220,7 @@ export default function MemberEditPage({ params }: { params: { id: string } }) {
                 <label htmlFor="firstName">First Name *</label>
               </span>
             </div>
-            <div className="field col-12 md:col-6 mb-3">
+            <div className="field col-12 md:col-6">
               <span className="p-float-label">
                 <InputText
                   id="lastName"
@@ -243,7 +231,7 @@ export default function MemberEditPage({ params }: { params: { id: string } }) {
                 <label htmlFor="lastName">Last Name *</label>
               </span>
             </div>
-            <div className="field col-12 md:col-6 mb-3">
+            <div className="field col-12 md:col-6">
               <span className="p-float-label">
                 <Dropdown
                   id="gender"
@@ -257,7 +245,7 @@ export default function MemberEditPage({ params }: { params: { id: string } }) {
                 <label htmlFor="gender">Gender *</label>
               </span>
             </div>
-            <div className="field col-12 md:col-6 mb-3">
+            <div className="field col-12 md:col-6">
               <span className="p-float-label">
                 <InputText
                   id="nic"
@@ -268,7 +256,7 @@ export default function MemberEditPage({ params }: { params: { id: string } }) {
                 <label htmlFor="nic">NIC *</label>
               </span>
             </div>
-            <div className="field col-12 md:col-6 mb-3">
+            <div className="field col-12 md:col-6">
               <span className="p-float-label">
                 <Calendar
                   id="dob"
@@ -284,10 +272,13 @@ export default function MemberEditPage({ params }: { params: { id: string } }) {
             </div>
           </div>
 
-          {/* Contact Info */}
-          <h3 className="text-lg font-semibold mt-4 mb-2 text-900">Contact Info</h3>
-          <div className="p-fluid grid formgrid">
-            <div className="field col-12 md:col-6 mb-3">
+          {/* Divider — Contact */}
+          <Divider align="center" className="um-divider">
+            <span className="um-divider-label">Contact Info</span>
+          </Divider>
+
+          <div className="p-fluid grid formgrid mt-3">
+            <div className="field col-12 md:col-6">
               <span className="p-float-label">
                 <InputText
                   id="email"
@@ -297,7 +288,7 @@ export default function MemberEditPage({ params }: { params: { id: string } }) {
                 <label htmlFor="email">Email Address</label>
               </span>
             </div>
-            <div className="field col-12 md:col-6 mb-3">
+            <div className="field col-12 md:col-6">
               <span className="p-float-label">
                 <InputText
                   id="phone"
@@ -308,7 +299,7 @@ export default function MemberEditPage({ params }: { params: { id: string } }) {
                 <label htmlFor="phone">Phone Number *</label>
               </span>
             </div>
-            <div className="field col-12 mb-3">
+            <div className="field col-12">
               <span className="p-float-label">
                 <InputTextarea
                   id="address"
@@ -322,10 +313,13 @@ export default function MemberEditPage({ params }: { params: { id: string } }) {
             </div>
           </div>
 
-          {/* Membership Info */}
-          <h3 className="text-lg font-semibold mt-4 mb-2 text-900">Membership Info</h3>
-          <div className="p-fluid grid formgrid">
-            <div className="field col-12 md:col-6 mb-3">
+          {/* Divider — Membership */}
+          <Divider align="center" className="um-divider">
+            <span className="um-divider-label">Membership Info</span>
+          </Divider>
+
+          <div className="p-fluid grid formgrid mt-3">
+            <div className="field col-12 md:col-6">
               <span className="p-float-label">
                 <InputText
                   id="membershipId"
@@ -336,7 +330,7 @@ export default function MemberEditPage({ params }: { params: { id: string } }) {
                 <label htmlFor="membershipId">Membership ID *</label>
               </span>
             </div>
-            <div className="field col-12 md:col-6 mb-3">
+            <div className="field col-12 md:col-6">
               <span className="p-float-label">
                 <Calendar
                   id="joinDate"
@@ -350,7 +344,7 @@ export default function MemberEditPage({ params }: { params: { id: string } }) {
                 <label htmlFor="joinDate">Join Date *</label>
               </span>
             </div>
-            <div className="field col-12 md:col-6 mb-3">
+            <div className="field col-12 md:col-6">
               <span className="p-float-label">
                 <Dropdown
                   id="status"
@@ -364,7 +358,7 @@ export default function MemberEditPage({ params }: { params: { id: string } }) {
                 <label htmlFor="status">Status *</label>
               </span>
             </div>
-            <div className="field col-12 md:col-6 mb-3">
+            <div className="field col-12 md:col-6">
               <span className="p-float-label">
                 <InputText
                   id="occupation"
@@ -377,10 +371,13 @@ export default function MemberEditPage({ params }: { params: { id: string } }) {
             </div>
           </div>
 
-          {/* Additional Info */}
-          <h3 className="text-lg font-semibold mt-4 mb-2 text-900">Additional Info</h3>
-          <div className="p-fluid grid formgrid">
-            <div className="field col-12 mb-3">
+          {/* Divider — Additional */}
+          <Divider align="center" className="um-divider">
+            <span className="um-divider-label">Additional Info</span>
+          </Divider>
+
+          <div className="p-fluid grid formgrid mt-3">
+            <div className="field col-12">
               <span className="p-float-label">
                 <InputText
                   id="familyMembers"
@@ -391,7 +388,7 @@ export default function MemberEditPage({ params }: { params: { id: string } }) {
                 <label htmlFor="familyMembers">Family Members (names) *</label>
               </span>
             </div>
-            <div className="field col-12 md:col-6 mb-3">
+            <div className="field col-12 md:col-6">
               <span className="p-float-label">
                 <InputText
                   id="emergencyName"
@@ -401,7 +398,7 @@ export default function MemberEditPage({ params }: { params: { id: string } }) {
                 <label htmlFor="emergencyName">Emergency Contact Name</label>
               </span>
             </div>
-            <div className="field col-12 md:col-6 mb-3">
+            <div className="field col-12 md:col-6">
               <span className="p-float-label">
                 <InputText
                   id="emergencyNumber"
@@ -411,7 +408,7 @@ export default function MemberEditPage({ params }: { params: { id: string } }) {
                 <label htmlFor="emergencyNumber">Emergency Contact Number</label>
               </span>
             </div>
-            <div className="field col-12 mb-3">
+            <div className="field col-12">
               <span className="p-float-label">
                 <InputTextarea
                   id="notes"
@@ -440,6 +437,54 @@ export default function MemberEditPage({ params }: { params: { id: string } }) {
               disabled={saving}
             />
           </div>
+
+          {/* Scoped tweaks (spacing + divider cosmetics) */}
+          <style jsx>{`
+            /* create comfortable row spacing between fields */
+            .um-edit :global(.formgrid) {
+              row-gap: 1.2rem;
+              column-gap: 1.25rem;
+            }
+            .um-edit :global(.field) {
+              margin-bottom: 0.6rem; /* light extra */
+            }
+
+            /* Make float-labels render like captions above the field for clearer separation */
+            .um-edit :global(.p-float-label) {
+              display: block;
+            }
+            .um-edit :global(.p-float-label label) {
+              position: static;
+              transform: none;
+              margin: 0 0 0.4rem 0;
+              font-size: 0.95rem;
+              opacity: 0.85;
+            }
+            .um-edit :global(.p-inputtext),
+            .um-edit :global(.p-inputtextarea),
+            .um-edit :global(.p-calendar .p-inputtext),
+            .um-edit :global(.p-dropdown .p-dropdown-label) {
+              padding-top: 0.9rem;
+              padding-bottom: 0.8rem;
+            }
+
+            /* Divider styling — subtle, long page-friendly */
+            .um-edit :global(.um-divider) {
+              margin: 2.25rem 0 1.25rem 0; /* plenty of vertical air */
+            }
+            .um-edit :global(.um-divider .um-divider-label) {
+              font-weight: 600;
+              font-size: 0.95rem;
+              color: rgba(255, 255, 255, 0.7);
+            }
+            .um-edit :global(.p-divider-horizontal:before),
+            .um-edit :global(.p-divider-horizontal:after) {
+              border-top-color: rgba(255, 255, 255, 0.08); /* subtle line on dark bg */
+            }
+            .um-edit :global(.p-divider .p-divider-content) {
+              padding: 0 .75rem; /* compact label paddings */
+            }
+          `}</style>
         </Card>
       </div>
     </div>
