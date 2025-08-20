@@ -66,12 +66,14 @@ const AppSidebar = (props: { sidebarRef: React.RefObject<HTMLDivElement> }) => {
             <div ref={props.sidebarRef} className="layout-sidebar" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
                 <div className="sidebar-header">
                     <Link href="/" className="app-logo">
-                        <div className="app-logo-small h-2rem">
-                            <img src={`/layout/images/logo/logo-${layoutConfig.colorScheme === 'light' ? 'dark' : 'light'}.png`} alt="Logo" />
-                        </div>
-                        <div className="app-logo-normal">
-                            <img className="h-2rem" src={`/layout/images/logo/logo-${layoutConfig.colorScheme === 'light' ? 'dark' : 'light'}.png`} alt="logo" />
-                            <img className="h-2rem ml-3" src={`/layout/images/logo/appname-${layoutConfig.colorScheme === 'light' ? 'dark' : 'light'}.png`} alt="App Name Logo" />
+                        {/* Use a single custom logo for both small and normal modes */}
+                        <div className="h-2rem flex align-items-center">
+                            {/* The logo must be placed in public/layout/images/paththinigama_logo.png */}
+                            <img
+                                src="/layout/images/paththinigama_logo.png"
+                                alt="Paththinigama logo"
+                                className="h-2rem"
+                            />
                         </div>
                     </Link>
                     <button className="layout-sidebar-anchor p-link z-2" type="button" onClick={anchor}></button>
