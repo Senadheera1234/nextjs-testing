@@ -1,12 +1,13 @@
-// app/(main)/apps/user-management/list/page.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { DataTable } from 'primereact/datatable';
-import { Column } from 'primereact/column';
+import { DataTable, DataTableFilterMeta } from 'primereact/datatable';
+import { Column, ColumnFilterApplyTemplateOptions, ColumnFilterClearTemplateOptions } from 'primereact/column';
 import { Button } from 'primereact/button';
+import { InputText } from 'primereact/inputtext';
 import { ProgressSpinner } from 'primereact/progressspinner';
+import { FilterMatchMode, FilterOperator } from 'primereact/api';
 import type { Member } from './MemberDetail';
 
 const API_BASE =
@@ -15,11 +16,23 @@ const API_BASE =
 
 export default function MemberListPage() {
   const router = useRouter();
+
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch members from the backend
+  // Filters & search (Atlantis "Filter Menu" pattern)
+  const [filters, setFilters] = useState<DataTableFilterMeta>({});
+  const [globalFilterValue, setGlobalFilterValue] = useState('');
+
+  // initial page size
+  const [rows] = useState<number>(10);
+
+  useEffect(() => {
+    initFilters();
+    fetchMembers();
+  }, []);
+
   const fetchMembers = async () => {
     setLoading(true);
     setError(null);
@@ -35,14 +48,77 @@ export default function MemberListPage() {
     }
   };
 
-  useEffect(() => {
-    fetchMembers();
-  }, []);
+  // ---------- Filtering helpers ----------
+  const initFilters = () => {
+    setFilters({
+      global: { value: null, matchMode: FilterMatchMode.CONTAINS },
 
-  // Format dates to YYYY-MM-DD
+      membership_id: {
+        operator: FilterOperator.AND,
+        constraints: [{ value: null, matchMode: FilterMatchMode.CONTAINS }],
+      },
+      first_name: {
+        operator: FilterOperator.AND,
+        constraints: [{ value: null, matchMode: FilterMatchMode.CONTAINS }],
+      },
+      last_name: {
+        operator: FilterOperator.AND,
+        constraints: [{ value: null, matchMode: FilterMatchMode.CONTAINS }],
+      },
+      nic: {
+        operator: FilterOperator.AND,
+        constraints: [{ value: null, matchMode: FilterMatchMode.CONTAINS }],
+      },
+      phone: {
+        operator: FilterOperator.AND,
+        constraints: [{ value: null, matchMode: FilterMatchMode.CONTAINS }],
+      },
+      status: {
+        operator: FilterOperator.OR,
+        constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS }],
+      },
+      join_date: {
+        operator: FilterOperator.AND,
+        constraints: [{ value: null, matchMode: FilterMatchMode.DATE_IS }],
+      },
+    });
+    setGlobalFilterValue('');
+  };
+
+  const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setGlobalFilterValue(value);
+
+    const _filters = { ...filters };
+    (_filters['global'] as any).value = value;
+    setFilters(_filters);
+  };
+
+  const clearFilterTemplate = (options: ColumnFilterClearTemplateOptions) => (
+    <Button type="button" icon="pi pi-times" onClick={options.filterClearCallback} severity="secondary" />
+  );
+
+  const applyFilterTemplate = (options: ColumnFilterApplyTemplateOptions) => (
+    <Button type="button" icon="pi pi-check" onClick={options.filterApplyCallback} severity="success" />
+  );
+
+  // ---------- Renderers ----------
+  const header = (
+    <div className="flex justify-content-between align-items-center">
+      <Button type="button" icon="pi pi-filter-slash" label="Clear" outlined onClick={initFilters} />
+      <span className="p-input-icon-left">
+        <i className="pi pi-search" />
+        <InputText
+          value={globalFilterValue}
+          onChange={onGlobalFilterChange}
+          placeholder="Search by NIC / Name / Membership ID"
+        />
+      </span>
+    </div>
+  );
+
   const formatDate = (d: string) => (d ? new Date(d).toISOString().slice(0, 10) : '');
 
-  // Action buttons: View and Edit
   const actionBodyTemplate = (member: Member) => (
     <div className="flex gap-2">
       <Button
@@ -62,6 +138,7 @@ export default function MemberListPage() {
     </div>
   );
 
+  // ---------- UI ----------
   return (
     <div className="card">
       <div className="mb-3 flex align-items-center justify-content-between">
@@ -87,20 +164,90 @@ export default function MemberListPage() {
       {!loading && !error && (
         <DataTable
           value={members}
-          tableStyle={{ minWidth: '60rem' }}
-          responsiveLayout="stack"
+          dataKey="id"
+          header={header}
+          paginator
+          rows={rows}
+          rowsPerPageOptions={[5, 10, 15]}
+          className="p-datatable-gridlines"
+          showGridlines
+          loading={loading}
+          responsiveLayout="scroll"
+          emptyMessage="No members found."
+          // filtering (global + column menu)
+          filters={filters}
+          filterDisplay="menu"
+          onFilter={(e) => setFilters(e.filters as DataTableFilterMeta)}
+          globalFilterFields={['nic', 'membership_id', 'first_name', 'last_name']}
+          tableStyle={{ minWidth: '70rem' }}
         >
-          <Column field="membership_id" header="Membership ID" />
-          <Column field="first_name" header="First Name" />
-          <Column field="last_name" header="Last Name" />
-          <Column field="phone" header="Phone" />
-          <Column field="status" header="Status" />
+          <Column
+            field="membership_id"
+            header="Membership ID"
+            sortable
+            filter
+            filterPlaceholder="Search ID"
+            filterClear={clearFilterTemplate}
+            filterApply={applyFilterTemplate}
+            style={{ minWidth: '12rem' }}
+          />
+          <Column
+            field="first_name"
+            header="First Name"
+            sortable
+            filter
+            filterPlaceholder="Search first name"
+            filterClear={clearFilterTemplate}
+            filterApply={applyFilterTemplate}
+            style={{ minWidth: '12rem' }}
+          />
+          <Column
+            field="last_name"
+            header="Last Name"
+            sortable
+            filter
+            filterPlaceholder="Search last name"
+            filterClear={clearFilterTemplate}
+            filterApply={applyFilterTemplate}
+            style={{ minWidth: '12rem' }}
+          />
+          <Column
+            field="nic"
+            header="NIC"
+            sortable
+            filter
+            filterPlaceholder="Search NIC"
+            filterClear={clearFilterTemplate}
+            filterApply={applyFilterTemplate}
+            style={{ minWidth: '12rem' }}
+          />
+          <Column
+            field="phone"
+            header="Phone"
+            filter
+            filterPlaceholder="Search phone"
+            filterClear={clearFilterTemplate}
+            filterApply={applyFilterTemplate}
+            style={{ minWidth: '10rem' }}
+          />
+          <Column
+            field="status"
+            header="Status"
+            sortable
+            filter
+            filterPlaceholder="Active/Inactive"
+            filterClear={clearFilterTemplate}
+            filterApply={applyFilterTemplate}
+            style={{ minWidth: '10rem' }}
+          />
           <Column
             field="join_date"
             header="Join Date"
+            sortable
             body={(m) => formatDate((m as Member).join_date)}
+            style={{ minWidth: '10rem' }}
           />
-          <Column body={actionBodyTemplate} header="Actions" />
+          <Column header="Actions" body={actionBodyTemplate} style={{ minWidth: '14rem' }} />
         </DataTable>
       )}
     </div>
