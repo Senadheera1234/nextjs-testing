@@ -124,7 +124,20 @@ export default function Dashboard() {
     });
   }, [members]);
 
+  // --- Chart options (only changes needed to fix sizing) ---
+  const doughnutOptions = {
+    responsive: true,
+    maintainAspectRatio: false, // <-- critical to allow fixed-height container
+    aspectRatio: 1,             // keep it square inside the container
+    plugins: {
+      legend: { position: 'bottom', labels: { color: '#CFCFCF' } },
+    },
+    cutout: '70%',
+  };
+
   const barOptions = {
+    responsive: true,
+    maintainAspectRatio: false, // match the fixed-height container for bar too
     plugins: {
       legend: { display: false },
     },
@@ -178,7 +191,7 @@ export default function Dashboard() {
                     <span className="text-sm text-color-secondary mb-1 block">New Members (This Year)</span>
                     <span className="text-3xl font-bold">{newMembersYear}</span>
                   </div>
-                    <span
+                  <span
                     className="p-3 border-round-lg"
                     style={{ backgroundColor: '#0BD18A', color: 'white' }}
                   >
@@ -208,32 +221,26 @@ export default function Dashboard() {
           <div className="col-12 md:col-6">
             <div className="card p-3">
               <h5 className="mb-3">Gender Breakdown</h5>
-              {genderChartData && (
-                <Chart
-                  type="doughnut"
-                  data={genderChartData}
-                  options={{
-                    plugins: {
-                      legend: { position: 'bottom', labels: { color: '#CFCFCF' } },
-                    },
-                    cutout: '70%',
-                  }}
-                  style={{ width: '100%', height: '250px' }} // size matched with bar chart
-                />
-              )}
+
+              {/* fixed-height container so Chart.js can size correctly */}
+              <div style={{ position: 'relative', width: '100%', height: 300 }}>
+                {genderChartData && (
+                  <Chart type="doughnut" data={genderChartData} options={doughnutOptions} />
+                )}
+              </div>
             </div>
           </div>
+
           <div className="col-12 md:col-6">
             <div className="card p-3">
               <h5 className="mb-3">Occupation Distribution</h5>
-              {occupationChartData && (
-                <Chart
-                  type="bar"
-                  data={occupationChartData}
-                  options={barOptions}
-                  style={{ width: '100%', height: '250px' }}
-                />
-              )}
+
+              {/* keep bar chart same height for nice alignment */}
+              <div style={{ position: 'relative', width: '100%', height: 300 }}>
+                {occupationChartData && (
+                  <Chart type="bar" data={occupationChartData} options={barOptions} />
+                )}
+              </div>
             </div>
           </div>
         </>
