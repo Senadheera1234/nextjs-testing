@@ -5,9 +5,12 @@ import { Chart } from 'primereact/chart';
 import { ProgressSpinner } from 'primereact/progressspinner';
 import type { Member } from './apps/user-management/list/MemberDetail';
 
+// const API_BASE =
+//   process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, '') ||
+//   'http://127.0.0.1:8000';
 const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, '') ||
-  'http://127.0.0.1:8000';
+  'https://es-back-uaj2.onrender.com';
 
 export default function Dashboard() {
   const [members, setMembers] = useState<Member[]>([]);

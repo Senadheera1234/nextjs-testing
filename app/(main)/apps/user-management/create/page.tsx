@@ -30,8 +30,9 @@ interface FormState {
   notes: string;
 }
 
-const API_BASE =
-  (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8000').replace(/\/$/, '');
+// const API_BASE =
+//   (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8000').replace(/\/$/, '');
+const API_BASE = (process.env.NEXT_PUBLIC_API_BASE_URL || 'https://es-back-uaj2.onrender.com').replace(/\/$/, '');
 
 export default function ProfileCreate() {
   const router = useRouter();
